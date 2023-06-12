@@ -1,0 +1,73 @@
+<div class="recharge-merge-address recharge-modal hidden">
+    <div class="recharge-merge-address__inner">
+        <h3 class="recharge-merge-address__title">Change Address</h3>
+        <div class="recharge-merge-address__form">
+            <div id="merge_address_radios"></div>
+        </div>
+        <div class="recharge-merge-address__button-group">
+            <button class="button button--primary save">Save</button>
+            <button class="button button--secondary cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .recharge-merge-address__inner {
+        background-color: #fff;
+        width: 500px;
+        max-width: 100%;
+        max-height: 100%;
+        padding: 30px;
+        position: relative;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    .recharge-merge-address__input-group {
+        margin-bottom: 15px;
+    }
+
+    .recharge-merge-address__button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .recharge-merge-address__button-group .button {
+        flex: 1;
+    }
+
+    .recharge-merge-address__form {
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .recharge-merge-address__form label {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .recharge-merge-address__form label span {
+        display: block;
+        width: 100%;
+    }
+
+    .recharge-merge-address__form input {
+        margin-top: 7px;
+    }
+
+    @media all and (min-width: 500px) {
+        .recharge-merge-address__button-group {
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+            height: 50px;
+        }
+
+        .recharge-merge-address__button-group  .button + .button {
+            margin-top: 0;
+        }
+    }
+</style>

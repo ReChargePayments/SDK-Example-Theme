@@ -1,0 +1,37 @@
+{
+  "sections": {
+    "recharge-bundles-widget": {
+      "type": "apps",
+      "blocks": {
+        "recharge-bundles-widget-block": {
+          "type": "shopify:\/\/apps\/recharge-subscriptions\/blocks\/bundles-widget\/371eed76-0b44-4869-9813-730372ea378e",
+          "settings": {
+            "product": "{{ product }}",
+            "rb_theme_color": "#1a494f",
+            "rb_theme_text": "#ffffff",
+            "rb_theme_other_text": "#283965",
+            "rb_theme_bg": "#ffffff",
+            "rb_text_size": "16px",
+            "rb_spacing_width": 1220,
+            "rb_spacing_margins": "24px",
+            "rb_buttons_size": "15px",
+            "rb_buttons_corners": "50",
+            "rb_builder_items_per_row_ns": 3,
+            "rb_builder_items_per_row": "1",
+            "rb_builder_aspect_ratio": "100%",
+            "rb_builder_radius": "4"
+          }
+        }
+      },
+      "block_order": [
+        "recharge-bundles-widget-block"
+      ],
+      "settings": {
+        "include_margins": false
+      }
+    }
+  },
+  "order": [
+    "recharge-bundles-widget"
+  ]
+}

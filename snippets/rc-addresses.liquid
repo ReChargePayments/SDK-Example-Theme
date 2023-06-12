@@ -1,0 +1,424 @@
+<section class="recharge-addresses">
+    <h2>Addresses</h2>
+    <recharge-addresses></recharge-addresses>
+    <button class="add-address button button--secondary hidden" type="button">
+        <span class="content">Add Address</span>
+    </button>
+    <div class="recharge-addresses__add recharge-modal hidden">
+        <div class="recharge-addresses__add-form">
+            <h3>Add Address</h3>
+            <form class="rc-form">
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddFirstName">First name</label>
+                    <input class="field-group__input" id="AddFirstName" name="first_name" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddLastName">Last name</label>
+                    <input class="field-group__input" id="AddLastName" name="last_name" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddAddressOne">Address 1</label>
+                    <input class="field-group__input" id="AddAddressOne" name="address1" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddAddressTwo">Address 2</label>
+                    <input class="field-group__input" id="AddAddressTwo" name="address2" value="">
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddCity">City</label>
+                    <input class="field-group__input" id="AddCity" name="city" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddState">State</label>
+                    <input class="field-group__input" id="AddState" name="state" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddZip">Zip</label>
+                    <input class="field-group__input" id="AddZip" name="zip" value="" required>
+                </div>
+                <div role="group" class="field-group">
+                    <label class="field-group__label" for="AddPhone">Phone</label>
+                    <input class="field-group__input" id="AddPhone" name="phone" value="">
+                </div>
+                <div class="button-group">
+                    <button class="save-address button button--primary" type="submit" style="margin-top:16px;">
+                        <span class="content">Save</span>
+                        <span class="loader"><span class="visually-hidden">Loading...</span></span>
+                    </button>
+                    <button class="button button--secondary cancel-address" type="submit" style="margin-top:16px;">
+                        <span class="content">Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="recharge-merge-address recharge-modal hidden">
+        <div class="recharge-merge-address__inner">
+            <h3 class="recharge-merge-address__title">Merge Addresses</h3>
+            <div class="recharge-merge-address__form">
+                <div id="merge_address_radios"></div>
+            </div>
+            <div class="recharge-merge-address__button-group">
+                <button class="button button--primary save">Save</button>
+                <button class="button button--secondary cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function showEditFields(address_id) {
+        document.getElementById("edit-address-"+address_id).parentElement.classList.remove('hidden')
+    }
+
+    function hiddenEditFields(address_id) {
+        document.getElementById("edit-address-"+address_id).parentElement.classList.add('hidden')
+    }
+
+    class RechargeAddresses extends HTMLElement {
+        constructor() {
+            super();
+            this.init();
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async init() {
+            this.setComponentLoading(true)
+            await this.login();
+            const { addresses } = await recharge.address.listAddresses(this.session);
+
+            this.renderAddresses(addresses);
+            this.setComponentLoading(false)
+        }
+
+        async setComponentLoading(value) {
+            if(!value) {
+                this.querySelector('.addresses-loader')?.remove();
+            } else if(value) {
+                this.innerHTML = `
+                    <div class="addresses-loader">
+                        <div class="addresses-loader__spinner"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+                `;
+            }
+        }
+
+        renderAddresses(addresses) {
+            let _this = this;
+            this.innerHTML = `
+                <div class="addresses">
+                    ${addresses.map(address => `
+                        <div class="recharge-address address-card" data-address-id="${address.id}">
+                            ${this.createAddressElement(address)}
+                        </div>
+                    `).join('')}
+                <div>
+            `;
+
+            addresses.forEach((address) => {
+                this.querySelector(`[name="edit-address-${address.id}"]`).addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = e.target.querySelector('button');
+                    submitBtn.classList.add('is-loading');
+                    submitBtn.setAttribute('disabled', true);
+                    await this.updateAddress(e.target.dataset.addressId, this.getAddressFields(e.target));
+                    submitBtn.classList.remove('is-loading');
+                    submitBtn.setAttribute('disabled', false);
+                    return false;
+                })
+
+                this.querySelector(`[data-address-id="${address.id}"] .delete-address`).addEventListener('click', (e) => {
+                    e.preventDefault();
+                    _this.deleteAddress(address.id, this);
+                })
+            });
+
+            document.querySelector('.add-address').addEventListener('click', () => {
+                document.querySelector('.recharge-addresses .recharge-addresses__add').classList.remove('hidden')
+                document.body.classList.add('scroll-lock');
+            })
+
+            document.querySelector('.cancel-address').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.recharge-addresses .recharge-addresses__add').classList.add('hidden')
+                document.querySelectorAll('.recharge-addresses__add-form input').forEach((input) => {
+                    input.value = '';
+                })
+                document.body.classList.remove('scroll-lock');
+            })
+
+            document.querySelector('.recharge-addresses .add-address').classList.remove('hidden')
+
+            document.querySelector('.recharge-addresses__add-form .save-address').addEventListener('click', (e) => {
+                e.preventDefault()
+                this.addNewAddress()
+            })
+        }
+
+        async addNewAddress(id) {
+            const form = document.querySelector('.recharge-addresses__add-form');
+
+            await recharge.address.createAddress(this.session, {
+                customer_id: this.session.customerId,
+                address1: document.getElementById('AddAddressOne').value,
+                address2: document.getElementById('AddAddressTwo').value,
+                city: document.getElementById('AddCity').value,
+                country_code: 'US',
+                first_name: document.getElementById('AddFirstName').value,
+                last_name: document.getElementById('AddLastName').value,
+                phone: document.getElementById('AddPhone').value,
+                province: document.getElementById('AddState').value,
+                zip: document.getElementById('AddZip').value,
+            });
+        }
+
+        async deleteAddress (id) {
+            if(confirm('Are you sure you want to delete this address?')){
+                await recharge.address.deleteAddress(this.session, id);
+                //document.querySelector('[data-address-id="${id}"]').remove();
+            }
+        }
+
+        createAddressElement(address) {
+            return `
+                <div id="address-group-${address.id}">
+                    <div>${address.first_name} ${address.last_name}</div>
+                    <div>${address.address1}</div>
+                    ${address.address2 ? `<div>${address.address2}</div>` : ''}
+                    <div>${address.city}, ${address.province} ${address.zip}</div>
+                    ${address.phone ? `<div>${address.address2}</div>` : ''}
+                </div>
+                <div class="recharge-addresses__edit recharge-modal hidden">
+                    <form class="rc-form recharge-addresses__edit-form" name="edit-address-${address.id}" id="edit-address-${address.id}" data-address-id="${address.id}">
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressFirstName_${address.id}">First name</label>
+                            <input class="field-group__input" id="AddressFirstName_${address.id}" name="first_name" value="${address.first_name}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressLastName_${address.id}">Last name</label>
+                            <input class="field-group__input" id="AddressLastName_${address.id}" name="last_name" value="${address.last_name}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressAddress_${address.id}">Address 1</label>
+                            <input class="field-group__input" id="AddressAddress_${address.id}" name="address1" value="${address.address1}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressAddress2_${address.id}">Address 2</label>
+                            <input class="field-group__input" id="AddressAddress2_${address.id}" name="address2" value="${address.address2 || ''}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressCity_${address.id}">City</label>
+                            <input class="field-group__input" id="AddressCity_${address.id}" name="city" value="${address.city}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressState_${address.id}">State</label>
+                            <input class="field-group__input" id="AddressState_${address.id}" name="state" value="${address.province}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressZip_${address.id}">Zip</label>
+                            <input class="field-group__input" id="AddressZip_${address.id}" name="zip" value="${address.zip}" />
+                        </div>
+                        <div role="group" class="field-group">
+                            <label class="field-group__label" for="AddressPhone_${address.phone}">Phone</label>
+                            <input class="field-group__input" id="AddressPhone_${address.phone}" name="phone" value="${address.phone}" />
+                        </div>
+                        <div class="button-group">
+                            <button class="save-address button button--primary" onClick="hiddenEditFields(${address.id})" id="save-address-button-${address.id}" type="submit" style="margin-top:16px;">
+                                <span class="content">Save</span>
+                                <span class="loader"><span class="visually-hidden">Loading...</span></span>
+                            </button>
+                            <button class="button button--secondary" onClick="hiddenEditFields(${address.id})" id="cancel-address-button-${address.id}" type="submit" style="margin-top:16px;">
+                                <span class="content">Cancel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <button class="edit-address button button--primary" onClick="showEditFields(${address.id})" id="edit-address-button-${address.id}" data-address-id="${address.id}" type="button" style="margin-top:16px;">
+                    <span class="content">Edit</span>
+                </button>
+                <button class="delete-address button button--secondary hidden" id="delete-address-button-${address.id}" data-address-id="${address.id}" type="button" style="margin-top:16px;">
+                    <span class="content">Delete</span>
+                </button>
+            `
+        }
+
+        /*
+        async renderMergeAddressRadios () {
+            const addressObj = await recharge.address.listAddresses(this.session);
+            const addresses = addressObj.addresses;
+            const addressRadios = document.getElementById('merge_address_radios');
+            const _this = this;
+
+            addresses.forEach((address) => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                const text = document.createElement('div');
+
+                text.innerHTML = `<span>${address.first_name} ${address.last_name}</span>`
+
+                if (address.address2) {
+                    text.innerHTML += `<span> ${address.address1} ${address.address2}</span>`
+                } else {
+                    text.innerHTML += `<span>${address.address1}</span>`
+                }
+
+                text.innerHTML += `
+                    <span>${address.city}, ${address.province} ${address.zip}</span>
+                `
+
+                input.type = 'radio';
+                input.name = 'address';
+                input.value = address.id;
+
+                label.appendChild(input);
+                label.appendChild(text);
+
+                addressRadios.appendChild(label);
+            });
+
+            document.querySelector('.recharge-edit-address .cancel').addEventListener('click', (e) => {
+                document.querySelector('.recharge-edit-address').classList.add('hidden');
+                document.querySelector('.recharge-edit-address label.hidden').classList.remove('hidden');
+                document.body.classList.remove('scroll-lock');
+            });
+
+            document.querySelector('.recharge-edit-address .save').addEventListener('click', (e) => {
+                const addressId = document.querySelector('.recharge-edit-address input[name="address"]:checked').value;
+                const subscriptionId = document.querySelector('.recharge-edit-address').getAttribute('data-subscription-id');
+                _this.changeAddress(addressId, subscriptionId);
+            });
+        }
+
+        async mergeAddress(targetId, sourceId) {
+            await recharge.address.mergeAddress(this.session, targetId, sourceId);
+            location.reload();
+        }
+        */
+
+        async updateAddress(id, updatedAddress) {
+            const address = await recharge.address.updateAddress(this.session, id, updatedAddress);
+            this.querySelector(`[data-address-id="${address.id}"]`).innerHTML = this.createAddressElement(address);
+        }
+
+        getAddressFields(form) {
+            const formData = new FormData(form);
+            return Object.fromEntries(formData);
+        }
+    }
+    customElements.define('recharge-addresses', RechargeAddresses);
+</script>
+
+<style>
+    .addresses-loader {
+        display: flex;
+        justify-content: center;
+        padding-top: 16px;
+    }
+
+    .addresses-loader__spinner {
+        display: inline-block;
+        border-top: 2px solid currentcolor;
+        border-right: 2px solid currentcolor;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-radius: 99999px;
+        border-bottom-width: 2px;
+        border-left-width: 2px;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        animation: 0.45s linear 0s infinite normal none running spinner;
+        width: var(--spinner-size);
+        height: var(--spinner-size);
+        --spinner-size: 5rem;
+    }
+
+    .recharge-addresses {
+        width: 100%;
+        text-align: left;
+    }
+
+    .recharge-addresses *:focus-visible {
+        outline-offset: 0;
+    }
+
+    .recharge-addresses .address-card,
+    .recharge-addresses .recharge-addresses__add-form {
+        display: flex;
+        flex-direction: column;
+        color: rgba(var(--color-foreground),.75);
+        border: 1px solid rgba(var(--color-foreground), .08);
+        padding: 20px;
+    }
+
+    .recharge-addresses .address-card {
+        font-size: 1.4rem;
+        line-height: 1.4;
+    }
+
+    .recharge-addresses__add-form,
+    .recharge-addresses__edit-form {
+        background-color: #FFF;
+        width: 600px;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .recharge-addresses__edit-form {
+        padding: 20px;
+    }
+
+    .recharge-addresses .address-card + .address-card,
+    .recharge-addresses .recharge-addresses__add-form {
+        margin-top: 16px;
+    }
+
+    .recharge-addresses__add-form h3 {
+        margin-top: 0;
+    }
+
+    .recharge-addresses button {
+        margin: 16px 0 0px;
+    }
+
+    .recharge-addresses .address-card .button-group .button,
+    .recharge-addresses .recharge-addresses__add-form .button {
+        width: 100%;
+    }
+
+    .recharge-addresses input {
+        padding: 12px !important;
+    }
+
+    .recharge-addresses button.is-loading .loader {
+        display: inline-block;
+        border-top: 2px solid currentcolor;
+        border-right: 2px solid currentcolor;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-radius: 99999px;
+        border-bottom-width: 2px;
+        border-left-width: 2px;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        animation: 0.45s linear 0s infinite normal none running spinner;
+        width: var(--spinner-size);
+        height: var(--spinner-size);
+        --spinner-size: 3rem;
+    }
+
+    .recharge-addresses button .loader {
+        display: none;
+    }
+
+    .recharge-addresses button.is-loading .content {
+        display: none;
+    }
+
+    .recharge-addresses button.add-address {
+        width: calc(100% - 40px);
+        margin: 16px 20px 0;
+    }
+</style>

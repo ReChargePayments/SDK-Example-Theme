@@ -1,0 +1,190 @@
+{
+  "sections": {
+    "slideshow": {
+      "type": "slideshow",
+      "blocks": {
+        "slide-0": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/maris-hero.jpg",
+            "heading": "Nordic Kelp Eye Cream",
+            "heading_size": "h0",
+            "subheading": "Made with premium ingredients sourced from the pristine waters of the North Atlantic, including nutrient-rich kelp, this cream deeply nourishes and hydrates the delicate skin around the eyes.",
+            "button_label": "Shop now",
+            "link": "shopify:\/\/products\/eye-cream-nordic-kelp-30-ml",
+            "button_style_secondary": true,
+            "box_align": "middle-left",
+            "show_text_box": false,
+            "text_alignment": "left",
+            "image_overlay_opacity": 10,
+            "color_scheme": "inverse",
+            "text_alignment_mobile": "left"
+          }
+        }
+      },
+      "block_order": [
+        "slide-0"
+      ],
+      "settings": {
+        "layout": "full_bleed",
+        "slide_height": "adapt_image",
+        "slider_visual": "dots",
+        "auto_rotate": false,
+        "change_slides_speed": 5,
+        "show_text_below": true,
+        "accessibility_info": "Slideshow about our brand"
+      }
+    },
+    "featured-collection-0": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Explore Our Bundles",
+        "heading_size": "h2",
+        "description": "",
+        "show_description": false,
+        "description_style": "body",
+        "collection": "bundles",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "full_width": true,
+        "show_view_all": false,
+        "view_all_style": "solid",
+        "enable_desktop_slider": true,
+        "color_scheme": "accent-2",
+        "image_ratio": "square",
+        "show_secondary_image": false,
+        "show_vendor": false,
+        "show_rating": false,
+        "enable_quick_add": false,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "image-with-text-2": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Moisturizer",
+            "heading_size": "h0"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Infused with natural birch sap, our best-selling moisturizer provides intense hydration to help plump and soften the skin, while promoting a more youthful and radiant complexion.<\/p>",
+            "text_style": "body"
+          }
+        },
+        "button": {
+          "type": "button",
+          "settings": {
+            "button_label": "Shop now",
+            "button_link": "shopify:\/\/products\/moisturizer-birch-sap-75-ml"
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "button"
+      ],
+      "settings": {
+        "image": "shopify:\/\/shop_images\/maris-highlight.jpg",
+        "height": "medium",
+        "desktop_image_width": "medium",
+        "layout": "text_first",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "content_layout": "no-overlap",
+        "color_scheme": "accent-1",
+        "mobile_content_alignment": "left",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "68c593f3-59da-4b1d-ab49-cdc999b38044": {
+      "type": "collage",
+      "blocks": {
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-0": {
+          "type": "image",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/maris-highlight2.jpg"
+          }
+        },
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-1": {
+          "type": "product",
+          "settings": {
+            "product": "essentials-bundle",
+            "second_image": false
+          }
+        },
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-2": {
+          "type": "collection",
+          "settings": {
+            "collection": "bundles"
+          }
+        }
+      },
+      "block_order": [
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-0",
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-1",
+        "template--18088256799001__68c593f3-59da-4b1d-ab49-cdc999b38044-16808268265eb4871d-2"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h1",
+        "desktop_layout": "left",
+        "mobile_layout": "column",
+        "card_styles": "none",
+        "color_scheme": "background-2",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "1b7b1a40-07bf-4fe6-9196-38a97faff8af": {
+      "type": "newsletter",
+      "blocks": {
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-0": {
+          "type": "heading",
+          "settings": {
+            "heading": "Subscribe to our emails",
+            "heading_size": "h1"
+          }
+        },
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Be the first to know about new collections and exclusive offers.<\/p>"
+          }
+        },
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-2": {
+          "type": "email_form",
+          "settings": {
+          }
+        }
+      },
+      "block_order": [
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-0",
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-1",
+        "template--18088256799001__1b7b1a40-07bf-4fe6-9196-38a97faff8af-16808241694f990f1c-2"
+      ],
+      "settings": {
+        "color_scheme": "inverse",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    }
+  },
+  "order": [
+    "slideshow",
+    "featured-collection-0",
+    "image-with-text-2",
+    "68c593f3-59da-4b1d-ab49-cdc999b38044",
+    "1b7b1a40-07bf-4fe6-9196-38a97faff8af"
+  ]
+}

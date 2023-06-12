@@ -1,0 +1,254 @@
+{{ '//code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css' | stylesheet_tag }}
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" defer="defer"></script>
+{% comment %} end adding icon to input field {% endcomment %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<section class="recharge-datepicker datepicker hidden recharge-modal">
+    <recharge-datepicker>
+        <div class="datepicker__inner">
+            <h3 class="datepicker__title">Change Shipment Date</h3>
+            <p class="datepicker__text">This order is set to ship on <strong></strong>. You can reschedule your order here.</p>
+            <div class="datepicker__form hidden">
+                <form id="date_picker" class="datepicker__form" name="edit-next-date">
+                    <div class="datepicker__input-group">
+                        <i class="fa fa-calendar icon"></i>
+                        <input id="date" type="text" class="datepicker__input" name="attributes[date]" value=""> 
+                    </div>
+                    <div class="datepicker__button-group">
+                        <button id="save_date" type="submit" class="button button--primary">Reschedule</button>
+                        <a id="cancel_date" class="button button--secondary" aria-role="cancel">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </recharge-datepicker>
+</section>
+
+<script>
+    function datePickerFunction() {
+        $('#date').datepicker({
+            changeMonth: true,
+            changeYear: false,
+            showButtonPanel: true,
+            yearRange: "-0:+1",
+            dateFormat: 'yy-mm-dd',
+            showAnim: "fold",
+            minDate : 1
+        });
+        document.querySelector('.datepicker__form').classList.remove('hidden');
+    }
+
+    class RechargeDateSetter extends HTMLElement {
+        selectors = {
+            loader: '.subscriptions-loader',
+        };
+
+        constructor() {
+            super();
+            this.modal = document.querySelector('.recharge-datepicker.datepicker');
+            this.loadSubscriptions();
+        }
+
+        async changeDate(e, subscriptions){
+            const submitBtn = e.target.querySelector('button');
+            e.preventDefault();
+            submitBtn.classList.add('is-loading');
+            submitBtn.setAttribute('disabled', true);
+            let newDate = document.getElementById("date").value,
+                subscription,
+                subscriptionID = this.modal.getAttribute('data-subscription-id');
+
+            subscriptions.forEach((sub) => {
+                if (sub.next_charge_scheduled_at != null) {
+                    subscription = sub;
+                    return;
+                }
+            })
+
+            const contents = await recharge.subscription.updateSubscriptionChargeDate(this.session, subscriptionID, newDate);
+
+            submitBtn.classList.remove('is-loading');
+            submitBtn.removeAttribute('disabled');
+            location.reload()
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async loadSubscriptions() {
+            this.setLoading(true);
+            await this.login();
+            const { subscriptions } = await recharge.subscription.listSubscriptions(this.session,);
+            var status = subscriptions.some(e => {
+                return e.status == "active"
+            })
+
+            if (status) {
+                this.renderDateForm(subscriptions);
+                document.getElementById("date_picker").addEventListener("submit", (e) => this.changeDate(e,subscriptions))
+            }
+
+            document.getElementById('cancel_date').addEventListener('click', () => this.closeModal());
+            this.setLoading(false);
+        }
+
+        async setLoading(value) {
+            const loader = this.querySelector(this.selectors.loader);
+            if (!value && loader) {
+                loader.remove();
+            } else if (value) {
+                const loadingEl = document.createElement('div');
+                loadingEl.classList.add(this.selectors.loader.split('.')[1]);
+                this.append(loadingEl);
+            }
+        }
+
+        renderDateForm(subscriptions){
+            let subscription,
+                chargeDate;
+
+            subscriptions.forEach((sub) => {
+                if (sub.next_charge_scheduled_at != null) {
+                    subscription = sub;
+                    chargeDate = window.moment(subscription.next_charge_scheduled_at).format('MMMM Do, YYYY');
+                    return;
+                }
+            })
+
+            this.querySelector('.datepicker__text strong').innerText = chargeDate;
+            document.getElementById('date').value = subscription.next_charge_scheduled_at;
+            datePickerFunction();
+        }
+
+        closeModal() {
+            this.modal.classList.add('hidden');
+            this.modal.removeAttribute('data-subscription-id');
+            this.modal.removeAttribute('data-next-charge');
+            document.body.classList.remove('scroll-lock');
+            document.getElementById("customer_logout_link").focus();
+        }
+    }
+
+    customElements.define('recharge-datepicker', RechargeDateSetter);
+</script>
+
+<style>
+    .datepicker__inner {
+        background-color: #fff;
+        width: 412px;
+        max-width: 100%;
+        max-height: 100%;
+        padding: 30px;
+        position: relative;
+        text-align: center;
+    }
+
+    .datepicker__title {
+        margin: 0 0 15px;
+    }
+
+    .datepicker__input-group {
+        height: 50px;
+        margin-bottom: 15px;
+    }
+
+    .datepicker__button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .datepicker__button-group .button {
+        flex: 1;
+    }
+
+    @media all and (min-width: 500px) {
+
+        .datepicker__button-group {
+            height: 50px;
+        }
+
+        .datepicker__button-group {
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .datepicker__button-group  .button + .button {
+            margin-bottom: 0;
+        }
+    }
+
+    .datepicker:not(last-of-type) {
+        margin-bottom: 16px;
+    }
+
+    .datepicker__text {
+        margin: 0 0 15px;
+    }
+
+    .datepicker__input-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .datepicker__input-group .icon {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translatey(-50%);
+    }
+
+    .datepicker__input {
+        box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground),var(--inputs-border-opacity));
+        border-radius: var(--inputs-radius);
+        padding: 10px 12px 10px 42px;
+        flex: 1;
+        height: 100%;
+        border: 0;
+        outline: none;
+    }
+
+    .datepicker__input:focus,
+    .datepicker__input:active {
+        outline-offset: 0;
+        outline: .2rem solid rgba(var(--color-foreground),.5);
+    }
+
+    .datepicker .button {
+        height: 100%;
+        margin-top: 0;
+    }
+
+    .datepicker a:hover {
+        cursor: pointer;
+    }
+
+    .datepicker button.is-loading .loader {
+        display: inline-block;
+        border-top: 2px solid currentcolor;
+        border-right: 2px solid currentcolor;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-radius: 99999px;
+        border-bottom-width: 2px;
+        border-left-width: 2px;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        animation: 0.45s linear 0s infinite normal none running spinner;
+        width: var(--spinner-size);
+        height: var(--spinner-size);
+        --spinner-size: 3rem;
+    }
+
+    .datepicker button .loader {
+        display: none;
+    }
+
+    .datepicker button.is-loading .content {
+        display: none;
+    }
+</style>

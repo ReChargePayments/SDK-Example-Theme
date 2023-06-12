@@ -1,0 +1,319 @@
+<div class="page-width">
+    <div class="dashboard">
+        <div class="dashboard__header">
+            <h1>{{ 'customer.account.title' | t }}</h1>
+            {{ 'Log out' | customer_logout_link }}
+        </div>
+        <div class="dashboard__upper">
+            <div class="dashboard__left">
+                <div class="dashboard__subcriptions">
+                    {%- render 'rc-account-subscriptions' -%}
+                </div>
+                <div class="dashboard__date-picker">
+                    {% render 'rc-datepicker' %}
+                </div>
+                <div class="dashboard__orders">
+                    {% render 'rc-orders' %}
+                </div>
+            </div>
+            <div class="dashboard__right">
+                <div class="dashboard__addresses">
+                    <div>{%- render 'rc-addresses' -%}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spinner {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* dashboard */
+
+    .dashboard {
+        padding: 30px 0;
+    }
+
+    .dashboard__header h1 {
+        margin: 0 0 1rem;
+    }
+
+    .dashboard__header a {
+        cursor: pointer;
+        display: inline-block;
+        border: none;
+        box-shadow: none;
+        text-decoration: underline;
+        text-underline-offset: 0.3rem;
+        color: rgb(var(--color-link));
+        background-color: transparent;
+        font-size: 1.4rem;
+        font-family: inherit;
+        color: rgba(var(--color-link), var(--alpha-link));
+        text-underline-offset: 0.3rem;
+        text-decoration-thickness: 0.1rem;
+        transition: text-decoration-thickness ease .1s;
+    }
+
+    .dashboard__upper {
+        display: grid;
+        gap: 30px;
+    }
+
+    @media all and (min-width: 980px) {
+        .dashboard__upper {
+            grid-template-columns: 3fr 1fr;
+        }
+    }
+
+
+    /* addresses */
+
+
+    .field-group {
+        font-size: 1.4rem;
+        width: 100%;
+        position: relative;
+        margin-bottom: 20px !important;
+    }
+
+    .field-group__label {
+        display: block;
+        font-size: 1.4rem;
+        margin-bottom: 8px !important;
+        margin-right: 12px !important;
+    }
+
+    .field-group__input {
+        width: 100%;
+        font-size: 1.4rem !important;
+        border: 0;
+        padding: 12px 16px !important;
+        margin-bottom: 0 !important;
+        height: 42px !important;
+        box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+        border-radius: var(--inputs-radius);
+    }
+
+    /* datepicker */
+
+    .ui-datepicker {
+        width: 300px;
+        height: 300px;
+        margin: 5px auto 0;
+        font-size: 12pt;
+        font-family: Work Sans, sans-serif;
+        -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    }
+
+    .ui-datepicker table {
+        width: 100%;
+    }
+
+    .ui-datepicker-current {
+        display: none;
+    }
+
+    .ui-datepicker-header {
+        background: #fff;
+
+        border-width: 1px 0 0 0;
+        border-style: solid;
+        border-color: #111;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        font-size: 15px;
+
+    }
+
+    .ui-datepicker-prev {
+        float: left;
+        cursor: pointer;
+        background-position: center -30px;
+    }
+
+    .ui-datepicker-next {
+        float: right;
+        cursor: pointer;
+        background-position: center 0px;
+    }
+
+    .ui-datepicker thead {
+        background-color: #f7f7f7;
+
+        /*border-bottom: 1px solid #bbb;*/
+    }
+
+    .ui-datepicker th {
+        background-color: #3903f0;
+        text-transform: uppercase;
+        font-size: 8pt;
+        color: #FFFFFF;
+        /*text-shadow: 1px 0px 0px #fff;*/
+        /*filter: dropshadow(color=#fff, offx=1, offy=0);*/
+    }
+
+    .ui-datepicker tbody td {
+        padding: 0;
+        /*border-right: 1px solid #808080;*/
+    }
+
+    .ui-datepicker tbody td:last-child {
+        border-right: 0px;
+    }
+
+    .ui-datepicker tbody tr {
+        border-bottom: 1px solid #bbb;
+    }
+
+    .ui-datepicker tbody tr:last-child {
+        border-bottom: 0px;
+    }
+
+    .ui-datepicker a {
+        text-decoration: none;
+    }
+
+    .ui-datepicker td span,
+    .ui-datepicker td a {
+        display: inline-block;
+        /*font-weight: bold;*/
+        text-align: center;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        color: #ffffff;
+        /*text-shadow: 1px 1px 0px #fff;*/
+        /*filter: dropshadow(color=#fff, offx=1, offy=1);*/
+    }
+
+    .ui-datepicker-calendar .ui-state-default {
+        background: #96E0DA;
+        color: #ffffff;
+        height: 40px;
+        width: 40px;
+
+    }
+
+    .ui-datepicker-close {
+        display: none;
+    }
+
+    .ui-datepicker-calendar .ui-state-hover {
+        background: #D3D3D3;
+        color: #FFFFFF;
+    }
+
+    .ui-datepicker-calendar .ui-state-active {
+        background: #3903f0;
+        -webkit-box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, .1);
+        -moz-box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, .1);
+        box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, .1);
+        color: #e0e0e0;
+        font-weight: bold;
+        text-shadow: 0px 1px 0px #4d7a85;
+        border: 1px solid #55838f;
+        position: relative;
+        margin: -1px;
+    }
+
+    .ui-datepicker-unselectable .ui-state-default {
+        background: #D3D3D3;
+        color: #000;
+    }
+
+    recharge-date-setter {
+        max-width: 100%;
+    }
+
+
+    .recharge-modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(var(--color-foreground),.75);
+        overflow: auto;
+        padding: 30px;
+        border: 1px solid rgba(var(--color-foreground), .08);
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+        background: rgba(0, 0, 0, .4);
+    }
+
+
+
+    .rc-form__control {
+        font-size: 14px;
+        width: 100%;
+        position: relative;
+        margin-bottom: 20px !important;
+    }
+
+    .rc-form__label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 8px !important;
+        margin-right: 12px !important;
+    }
+
+    .rc-form__input {
+        width: 100%;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+        border: 1px solid #000 !important;
+        padding: 12px 16px !important;
+        margin-bottom: 0 !important;
+        height: 42px !important;
+    }
+
+    .toggle-button,
+    .edit-button,
+    .dashboard__orders a.product-title {
+        cursor: pointer;
+        display: inline-block;
+        border: none;
+        box-shadow: none;
+        text-decoration: underline;
+        color: rgb(var(--color-link));
+        background-color: transparent;
+        font-size: 1.4rem;
+        font-family: inherit;
+        color: rgba(var(--color-link),var(--alpha-link));
+        text-underline-offset: 0.3rem;
+        text-decoration-thickness: 0.1rem;
+        transition: text-decoration-thickness ease .1s;
+        padding: 0;
+    }
+
+    .edit-button,
+    .subscriptions__table .product-cell .frequency span,
+    .subscriptions__table .product-cell .next-charge span,
+    .subscriptions__table .product-cell .sub-address span {
+        font-size: 1.2rem;
+    }
+
+    .subscriptions__table .product-cell .sub-address span {
+        line-height: 1.4;
+    }
+
+    .subscriptions__table .product-cell div:not(:last-of-type) {
+        margin-bottom: 10px;
+    }
+</style>

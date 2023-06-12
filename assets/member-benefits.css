@@ -1,0 +1,21 @@
+.member-benefits-content {
+  padding-bottom: 30px;
+}
+
+.member-benefits-content h1 {
+  font-size: 38px;
+  margin-bottom: 0;
+}
+
+.member-benefits-content h3 {
+  font-size: 20px;
+}
+
+.member-benefits-content .button,
+.member-benefits-content .button:hover {
+  color: #FFFFFF;
+}
+
+.newsletter .newsletter__wrapper {
+  padding-bottom: 60px;
+}

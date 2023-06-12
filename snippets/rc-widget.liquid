@@ -1,0 +1,101 @@
+<recharge-widget>
+    {% comment %}
+    <details class="widget__code-snippets">
+        <summary>Widget SDK Calls</summary>
+        <div>
+            <p class="">await <span>getCDNWidgetSettings</span>(external_product_id)</p>
+            <code class="code1"></code>
+            <p class="">await <span>getCDNProduct</span>(external_product_id)</p>
+            <code class="code2"></code>
+        </div>
+    </details>
+
+    <script>// document.querySelector('.widget__code-snippets .code1').innerHTML = JSON.stringify(this.widget)
+        // document.querySelector('.widget__code-snippets .code2').innerHTML = JSON.stringify(this.product)</script>
+    {% endcomment %}
+    <div class="widget hidden" data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+
+        <div class="widget__template-radio hidden">
+            <div class="widget__radio-wrapper">
+                <div class="widget__radio subscription-radio">
+                    <div class="widget__radio-option-selector">
+                        <label for="selling_plan_subsave" class="widget__radio-label">
+                            <input id="selling_plan_subsave" class="widget__radio-input" type="radio" name="selling_plan"/>
+                            <span class="widget__radio-option-text">
+                                <span class="option-text"></span>
+                                <span class="option-discount"></span>
+                                <span class="option-price"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="widget__selling-plans hidden">
+                        <label for="rc_selling_plan" class="widget__selling-plans-dropdown">
+                            <span class="widget__selling-plans-dropdown__label visually-hidden">Delivery</span>
+                            <select class="widget__selling-plans-dropdown__select" name="rc_selling_plan"></select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="widget__radio one-time-radio">
+                    <div class="widget__radio-option-selector">
+                        <label for="selling_plan_one-time" class="widget__radio-label">
+                            <input id="selling_plan_one-time" class="widget__radio-input" type="radio" name="selling_plan"/>
+                            <span class="widget__radio-option-text">
+                                <span class="option-text"></span>
+                                <span class="option-discount"></span>
+                                <div class="option-price"></div>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="widget__template-checkbox hidden">
+            <div class="widget__checkbox-wrapper">
+                <div class="widget__checkbox">
+                    <label for="selling_plan_checkbox" class="widget__checkbox-label">
+                        <input id="checkbox" class="widget__checkbox-input" type="checkbox" name="selling_plan_checkbox"/>
+                        <span class="widget__checkbox-option-text">
+                            <span class="option-text"></span>
+                            <span class="option-discount"></span>
+                            <span class="option-sub"></span>
+                        </span>
+                    </label>
+                    <div class="widget__selling-plans hidden">
+                        <label for="rc_selling_plan" class="widget__selling-plans-dropdown">
+                            <span class="widget__selling-plans-dropdown__label visually-hidden">Delivery</span>
+                            <select class="widget__selling-plans-dropdown__select" name="rc_selling_plan"></select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="widget__subscription-details hidden">
+            <button type="button" class="widget__subscription-details-button">
+                {% render 'icon-recharge-circle-arrow' %}
+                <span class="widget__subscription-details__text"></span>
+            </button>
+            <div class="widget__tooltip">
+                <div class="widget__tooltip-content">
+                    <div class="how-it-works">
+                        <span class="how-it-works__title"></span>
+                    </div>
+                    <a class="learn-more hidden" href="" rel="noopener noreferrer" target="_blank"></a>
+                    <div class="widget__tooltip-footer hidden">
+                        <a href="http://rechargepayments.com/subscribe-with-recharge" target="_blank" rel="noopener noreferrer" class="widget-tooltip__badge">
+                            <span class="powered-by">Powered by</span>
+                            {% render 'icon-recharge-logo' %}
+                        </a>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+        </div>
+    </div>
+</recharge-widget>
+
+<link rel="stylesheet" href="{{ 'rc-widget.css' | asset_url }}">
+<script src="{{ 'rc-widget.js' | asset_url }}" defer></script>

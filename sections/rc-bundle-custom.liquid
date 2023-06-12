@@ -1,0 +1,322 @@
+{% liquid
+    assign brandColor = section.settings.brand_color
+    assign buttonTextColor = section.settings.text_color
+    assign otherTextColor = section.settings.other_text_color
+    assign backgroundColor = section.settings.background_color
+    assign aspectRatio = section.settings.image_aspect_ratio
+    assign textSize = section.settings.text_size
+    assign max_width = section.settings.max_width
+    assign margins = section.settings.margins
+    assign buttonSize = section.settings.button_size
+    assign buttonBorderRadius =  section.settings.button_corners
+    assign productsPerRow = section.settings.products_per_row
+%}
+
+<section
+    class="bundle custom-bundle page-width section-{{ section.id }}"
+    data-product-id="{{ product.id }}"
+    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    data-product-handle="{{ product.handle }}"
+>
+    <recharge-bundle-custom>
+        <div class="bundle__upper">
+            <div class="bundle__header">
+                <h1 class="bundle__title">{{ product.title }}</h1>
+                <div class="bundle__price">
+                    <s class="bundle__price-discount hidden"></s>
+                    <span class="bundle__price-regular">{{ product.price | money }}</span>
+                </div>
+            </div>
+            <div class="bundle__form">
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" class="product-variant-id">
+                <input type="hidden" name="selling_plan" value="" class="selling-plan-input">
+                <input type="hidden" name="properties[contents]" value="" class="product-bundle-contents">
+                <input type="hidden" name="properties[_rb_id]" value="" class="product-bundle-id">
+
+                <div class="product-form__buttons">
+                    {%- liquid
+                        assign check_against_inventory = true
+                        if product.selected_or_first_available_variant.inventory_management != 'shopify' or  product.selected_or_first_available_variant.inventory_policy == 'continue'
+                            assign check_against_inventory = false
+                        endif
+                        if product.selected_or_first_available_variant.quantity_rule.min > product.selected_or_first_available_variant.inventory_quantity and check_against_inventory
+                            assign quantity_rule_soldout = true
+                        endif
+                    -%}
+                    <div class="bundle__form-dropdown">
+                        <label for="subscription"></label>
+                        <select name="subscription" class="bundle__form-dropdown-select"></select>
+                    </div>
+                    <div class="bundle__button-container">
+                        <button class="bundle__form-add bundle-btn">
+                            <span></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="bundle__progress-wrapper">
+                <div class="bundle__progress-bar">
+                    <div class="bundle__progress-bar-inner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="bundle__lower"></div>
+    </recharge-bundle-custom>
+</section>
+
+{% comment %}
+<div class="bundle__placholder">
+    <div class="bundle__item">
+        <div class="bundle__item-image"></div>
+        <div class="bundle__item-content">
+            <p class="bundle__item-title"></p>
+            <div class="bundle__item-controls">
+            </div>
+        </div>
+    </div>
+</div>
+{% endcomment %}
+
+<div id="test"></div>
+
+<div class="bundle-modal hidden"></div>
+
+<style>
+    .section-{{ section.id }} {
+        --font-size-5: {{ textSize }}px;
+        --font-size-headline: calc(var(--font-size-5)*6);
+        --font-size-subheadline: calc(var(--font-size-5)*5);
+        --font-size-1: calc(var(--font-size-5)*2.64);
+        --font-size-2: calc(var(--font-size-5)*2);
+        --font-size-3: calc(var(--font-size-5)*1.52);
+        --font-size-4: calc(var(--font-size-5)*1.15);
+        --font-size-6: calc(var(--font-size-5)*0.87);
+        --font-size-7: calc(var(--font-size-5)*0.75);
+        --bundle-max-width: {{ maxWidth }}px;
+        --bundle-brand: {{ brandColor }};
+        --bundle-brand-10: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.1);
+        --bundle-brand-20: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.2);
+        --bundle-brand-30: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.3);
+        --bundle-brand-40: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.4);
+        --bundle-brand-50: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.5);
+        --bundle-brand-60: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.6);
+        --bundle-brand-70: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.7);
+        --bundle-brand-80: rgba({{ brandColor.red }}, {{ brandColor.green }}, {{ brandColor.blue }}, 0.8);
+        --bundle-btn-text: {{ buttonTextColor }};
+        --bundle-btn-bg: {{ brandColor }};
+        --bundle-text: {{ otherTextColor }};
+        --bundle-text-10: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.1);
+        --bundle-text-20: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.2);
+        --bundle-text-30: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.3);
+        --bundle-text-40: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.4);
+        --bundle-text-50: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.5);
+        --bundle-text-60: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.6);
+        --bundle-text-70: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.7);
+        --bundle-text-80: rgba({{ otherTextColor.red }}, {{ otherTextColor.green }}, {{ otherTextColor.blue }}, 0.8);
+        --bundle-bg: {{ backgroundColor }};
+        --bundle-progress-bar: {{ brandColor }};
+        --bundle-progress-bar-guide: var(--bundle-brand-20);
+        --bundle-btn-pady: calc({{ buttonSize }}px / 2);
+        --bundle-btn-padx: calc({{ buttonSize }}px);
+        --bundle-btn-radius: {{ buttonBorderRadius }}px;
+        --bundle-spacing: {{ margins }}px;
+        --bundle-aspect-ratio: {{ aspectRatio }}%;
+        --bundle-item-width: calc(100% / {{ productsPerRow }});
+        --bundle-item-radius: {{ itemBorderRadius }}px;
+    }
+</style>
+
+<link rel="stylesheet" href="{{ 'bundle-custom.css' | asset_url }}">
+<script src="{{ 'bundle-custom.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Recharge Bundle (Custom)",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "brand_color",
+      "label": "Brand",
+      "default": "#00C09E",
+      "info": "This color is used for buttons, progress bars and navigation."
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text in buttons",
+      "default": "#FFFFFF",
+      "info": "All text that appears in buttons and navigation will use this color."
+    },
+    {
+      "type": "color",
+      "id": "other_text_color",
+      "label": "Other text",
+      "default": "#283965",
+      "info": "This color will be used for all text that sits on the main page background."
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#FFFFFF",
+      "info": "Make sure this has enough contrast with your brand and text colors."
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "radio",
+      "id": "text_size",
+      "label": "Text size",
+      "default": "16",
+      "options": [
+        {
+          "value": "21",
+          "label": "Big"
+        },
+        {
+          "value": "16",
+          "label": "Medium"
+        },
+        {
+          "value": "14",
+          "label": "Small"
+        }
+      ]
+    },
+    {
+        "type": "header",
+        "content": "Spacing"
+    },
+    {
+        "type": "range",
+        "id": "max_width",
+        "label": "Maximum width",
+        "min": 800,
+        "max": 1600,
+        "default": 1220,
+        "unit": "px",
+        "step": 10,
+        "info": "This sets the maximum width of the bundle builder. It only applies to large screens (computers and tablets)."
+    },
+    {
+        "type": "radio",
+        "id": "margins",
+        "label": "Margins",
+        "default": "15",
+        "options": [
+            {
+                "value": "24",
+                "label": "Wide"
+            },
+            {
+                "value": "15",
+                "label": "Medium"
+            },
+            {
+                "value": "10",
+                "label": "Tight"
+            }
+        ],
+        "info": "This controls spacing between elements."
+    },
+    {
+        "type": "header",
+        "content": "Buttons"
+    },
+    {
+        "type": "radio",
+        "id": "button_size",
+        "label": "Button size",
+        "default": "15",
+        "options": [
+            {
+                "value": "24",
+                "label": "Large"
+            },
+            {
+                "value": "15",
+                "label": "Medium"
+            },
+            {
+                "value": "10",
+                "label": "Tight"
+            }
+        ]
+    },
+    {
+        "type": "radio",
+        "id": "button_corners",
+        "label": "Button corners",
+        "default": "4",
+        "options": [
+            {
+                "value": "0",
+                "label": "Square"
+            },
+            {
+                "value": "4",
+                "label": "Rounded"
+            }
+        ]
+    },
+    {
+        "type": "header",
+        "content": "Box Builder"
+    },
+    {
+        "type": "range",
+        "id": "products_per_row",
+        "label": "Products per row (large screens)",
+        "min": 1,
+        "max": 5,
+        "default": 4,
+        "step": 1,
+        "info": "This controls how many products appear per row for large screens"
+    },
+    {
+        "type": "radio",
+        "id": "image_aspect_ratio",
+        "label": "Product image aspect ratio",
+        "default": "100",
+        "options": [
+            {
+                "value": "100",
+                "label": "Square"
+            },
+            {
+                "value": "133",
+                "label": "Portrait"
+            },
+            {
+                "value": "75",
+                "label": "Landscape"
+            }
+        ]
+    },
+    {
+        "type": "radio",
+        "id": "image_corners",
+        "label": "Product image corners",
+        "default": "4",
+        "options": [
+            {
+                "value": "0",
+                "label": "Square"
+            },
+            {
+                "value": "4",
+                "label": "Rounded"
+            }
+        ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,145 @@
+<h2>{{ 'customer.orders.title' | t }}</h2>
+
+{% paginate customer.orders by 5 %}
+    {% if customer.orders.size != 0 %}
+        <table class="orders__table">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'customer.orders.order_number' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.date' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.payment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.fulfillment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.total' | t }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in customer.orders %}
+                    <tr>
+                        <th data-label="{{ 'customer.orders.order_number' | t }}" scope="row">
+                            <a href="{{ order.customer_url }}" class="product-title" aria-label="{{ 'customer.orders.order_number_link' | t: number: order.name }}">{{ order.name }}</a>
+                        </th>
+                        <td data-label="{{ 'customer.orders.date' | t }}">
+                            <span class="mobile-label">{{ 'customer.orders.date' | t }}</span>
+                            <span>{{ order.created_at | time_tag: format: 'date' }}</span>
+                        </td>
+                        <td data-label="{{ 'customer.orders.payment_status' | t }}">
+                            <span class="mobile-label">{{ 'customer.orders.payment_status' | t }}</span>
+                            <span>{{ order.financial_status_label }}</span>
+
+                        </td>
+                        <td data-label="{{ 'customer.orders.fulfillment_status' | t }}">
+                            <span class="mobile-label">{{ 'customer.orders.fulfillment_status' | t }}</span>
+                            <span>{{ order.fulfillment_status_label }}</span>
+                        </td>
+                        <td data-label="{{ 'customer.orders.total' | t }}">
+                            <span class="mobile-label">{{ 'customer.orders.total' | t }}</span>
+                            <span>{{ order.total_price | money }}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>{{ 'customer.orders.none' | t }}</p>
+    {% endif %}
+    {%- if paginate.pages > 1 -%}
+        {% include 'pagination', paginate: paginate %}
+    {%- endif -%}
+{% endpaginate %}
+
+<style>
+    .orders__table {
+        font-size: 1.6rem;
+        table-layout: auto;
+        border-collapse: collapse;
+        box-shadow: none;
+        width: 100%;
+        border: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .orders__table thead {
+        border-bottom: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .orders__table thead th {
+        text-align: left;
+        font-size: 1.2rem;
+        letter-spacing: .07rem;
+        text-transform: uppercase;
+    }
+
+    .orders__table th,
+    .orders__table td {
+        text-align: left;
+        padding: 10px 14px;
+        width: 15%;
+    }
+
+    .orders__table tbody tr+tr {
+        border-top: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .orders__table tbody td span {
+        font-size: 1.4rem;
+        text-align: left;
+        letter-spacing: .07rem;
+        flex-grow: 1;
+    }
+
+    .orders__table tbody td .mobile-label {
+        text-transform: uppercase;
+        flex-grow: unset;
+        width: 82px;
+    }
+
+    .orders__table tbody td .mobile-label {
+        width: 105px;
+    }
+
+    @media all and (max-width: 750px) {
+
+        .orders__table tr {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .orders__table thead {
+            display: none;
+        }
+
+        .orders__table tbody td {
+            display: flex;
+            width: 100%;
+            padding: 1.2rem 1.6rem;
+            gap: 1.6rem;
+        }
+
+        .orders__table tbody td:first-of-type {
+            padding-left: 1.6rem;
+        }
+    }
+
+    @media all and (min-width: 751px) {
+        .orders__table tbody td .mobile-label {
+            display: none;
+        }
+
+        .orders__table th,
+        .orders__table td {
+            padding-top: 2.4rem;
+            padding-bottom: 2.4rem;
+        }
+    }
+
+    .orders__table th:first-of-type,
+    .orders__table td:first-of-type {
+        padding-left: 2.2rem;
+    }
+
+    .orders__table th:last-of-type,
+    .orders__table td:last-of-type {
+        padding-right: 2.2rem;
+    }
+</style>

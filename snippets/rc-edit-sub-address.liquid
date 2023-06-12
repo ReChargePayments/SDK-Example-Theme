@@ -1,0 +1,149 @@
+<div class="recharge-edit-address recharge-modal hidden">
+    <edit-subscription-address class="recharge-edit-address__inner">
+        <h3 class="recharge-edit-address__title">Change Address</h3>
+        <div class="recharge-edit-address__form">
+            <div id="address_radios"></div>
+        </div>
+        <div class="recharge-edit-address__button-group">
+            <button class="button button--primary save" disabled>Save</button>
+            <button class="button button--secondary cancel">Cancel</button>
+        </div>
+    </edit-subscription-address>
+</div>
+
+<script>
+    class EditSubscriptionAddress extends HTMLElement {
+        constructor() {
+            super();
+            this.init();
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async init() {
+            await this.login();
+            this.renderAddressRadios();
+        }
+
+        async renderAddressRadios() {
+            const addressObj = await recharge.address.listAddresses(this.session),
+                addresses = addressObj.addresses,
+                modal = document.querySelector('.recharge-edit-address'),
+                addressRadios = document.getElementById('address_radios'),
+                _this = this;
+
+            addresses.forEach((address) => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                const text = document.createElement('div');
+
+                text.innerHTML = `<span>${address.first_name} ${address.last_name}</span>`
+
+                if (address.address2) {
+                    text.innerHTML += `<span> ${address.address1} ${address.address2}</span>`
+                } else {
+                    text.innerHTML += `<span>${address.address1}</span>`
+                }
+
+                text.innerHTML += `
+                    <span>${address.city}, ${address.province} ${address.zip}</span>
+                `
+
+                input.type = 'radio';
+                input.name = 'address';
+                input.value = address.id;
+                input.addEventListener('change', (e) => {
+                    modal.querySelector('.save').disabled = false;
+                })
+
+                label.appendChild(input);
+                label.appendChild(text);
+
+                addressRadios.appendChild(label);
+            });
+
+            modal.querySelector('.cancel').addEventListener('click', (e) => {
+                modal.classList.add('hidden');
+                modal.querySelector('label.hidden').classList.remove('hidden');
+                document.body.classList.remove('scroll-lock');
+            });
+
+            modal.querySelector('.save').addEventListener('click', (e) => {
+                const addressId = document.querySelector('.recharge-edit-address input[name="address"]:checked').value,
+                    subscriptionId = document.querySelector('.recharge-edit-address').getAttribute('data-subscription-id');
+                _this.changeAddress(addressId, subscriptionId);
+            });
+        }
+
+        async changeAddress (addressId, subscriptionId) {
+            await recharge.subscription.updateSubscriptionAddress(this.session, subscriptionId, addressId).then(() => {
+                location.reload();
+            });
+        }
+    }
+
+    customElements.define('edit-subscription-address', EditSubscriptionAddress);
+</script>
+
+<style>
+    .recharge-edit-address__inner {
+        background-color: #fff;
+        width: 500px;
+        max-width: 100%;
+        max-height: 100%;
+        padding: 30px;
+        position: relative;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    .recharge-edit-address__input-group {
+        margin-bottom: 15px;
+    }
+
+    .recharge-edit-address__button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .recharge-edit-address__button-group .button {
+        flex: 1;
+    }
+
+    .recharge-edit-address__form {
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .recharge-edit-address__form label {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .recharge-edit-address__form label span {
+        display: block;
+        width: 100%;
+    }
+
+    .recharge-edit-address__form input {
+        margin-top: 7px;
+    }
+
+    @media all and (min-width: 500px) {
+        .recharge-edit-address__button-group {
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+            height: 50px;
+        }
+
+        .recharge-edit-address__button-group  .button + .button {
+            margin-top: 0;
+        }
+    }
+</style>

@@ -1,0 +1,148 @@
+<div class="recharge-swap-product recharge-modal hidden">
+    <swap-product class="recharge-swap-product__inner">
+        <h3 class="recharge-swap-product__title">Swap Product</h3>
+        <div class="recharge-swap-product__form">
+            {% for product in collections.frontpage.products %}
+                <label class="recharge-swap-product__item">
+                    <input
+                        class="recharge-swap-product__item-input"
+                        type="radio"
+                        name="product"
+                        value="{{ product.id }}"
+                        data-product-id="{{ product.id }}"
+                        data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+                    <span>{{ product.title }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        <div class="recharge-swap-product__button-group">
+            <button class="button button--primary save" disabled>Save</button>
+            <button class="button button--secondary cancel">Cancel</button>
+        </div>
+    </swap-product>
+</div>
+
+<script>
+    class SwapProduct extends HTMLElement {
+        constructor() {
+            super();
+            this.session = null;
+            this.modal = document.querySelector('.recharge-swap-product');
+            this.init()
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async init() {
+            await this.login();
+            this.setupModal()
+        }
+
+        setupModal() {
+            let modal = document.querySelector('.recharge-swap-product');
+
+            modal.querySelectorAll('input').forEach((input) => {
+                input.addEventListener('change', () => {
+                    modal.querySelector('.button.save').removeAttribute('disabled');
+                })
+            })
+
+            modal.querySelector('.cancel').addEventListener('click', this.closeModal.bind(this));
+
+            modal.querySelector('.save').addEventListener('click', this.submitModal.bind(this));
+        }
+
+        closeModal() {
+            this.modal.classList.add('hidden');
+            this.modal.querySelector('.button.save').setAttribute('disabled', true);
+            if(this.modal.querySelector('input:checked')) this.modal.querySelector('input:checked').checked = false;
+            if(this.modal.querySelector('.recharge-swap-product__item.hidden')) this.modal.querySelector('.recharge-swap-product__item.hidden').classList.remove('hidden');
+            document.body.classList.remove('scroll-lock');
+            document.getElementById("customer_logout_link").focus();
+        }
+
+        async submitModal() {
+            this.updateSubscription(this.modal.getAttribute('data-subscription-id'), this.modal.querySelector('input:checked').value, this.modal.querySelector('input:checked').getAttribute('data-variant-id'));
+            this.modal.classList.add('hidden')
+        }
+
+        async updateSubscription(subscriptionId, productId, variantId) {
+            await recharge.subscription.updateSubscription(this.session, subscriptionId, {
+                external_variant_id: {
+                    ecommerce: variantId
+                },
+                external_product_id: {
+                    ecommerce: productId
+                }
+            }).then((response) => {
+                location.reload();
+            });
+        }
+
+    }
+    customElements.define('swap-product', SwapProduct);
+</script>
+
+<style>
+    .recharge-swap-product__inner {
+        background-color: #fff;
+        width: 500px;
+        max-width: 100%;
+        max-height: 100%;
+        padding: 30px;
+        position: relative;
+        text-align: center;
+        font-size: 1.4rem;
+    }
+
+    .recharge-swap-product__input-group {
+        margin-bottom: 15px;
+    }
+
+    .recharge-swap-product__button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .recharge-swap-product__button-group .button {
+        flex: 1;
+    }
+
+    .recharge-swap-product__form {
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .recharge-swap-product__form label {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .recharge-swap-product__form label span {
+        display: block;
+        width: 100%;
+    }
+
+    .recharge-swap-product__form input {
+        margin-top: 2px;
+    }
+
+    @media all and (min-width: 500px) {
+        .recharge-swap-product__button-group {
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+            height: 50px;
+        }
+
+        .recharge-swap-product__button-group  .button + .button {
+            margin-top: 0;
+        }
+    }
+</style>

@@ -1,0 +1,124 @@
+<div class="recharge-edit-frequency recharge-modal hidden">
+    <edit-frequency class="recharge-edit-frequency__inner">
+        <h3 class="recharge-edit-frequency__title">Change Frequency</h3>
+        <div class="recharge-edit-frequency__form">
+            <label>
+                <span>Frequency</span>
+            </label>
+            <select name="frequency" class="field-group__input">
+            </select>
+        </div>
+        <div class="recharge-edit-frequency__button-group">
+            <button class="button button--primary save" disabled>Save</button>
+            <button class="button button--secondary cancel">Cancel</button>
+        </div>
+    </edit-frequency>
+</div>
+
+<script>
+    class EditFrequency extends HTMLElement {
+        constructor() {
+            super();
+            this.session = null;
+            this.modal = document.querySelector('.recharge-edit-frequency');
+            this.init();
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async init() {
+            await this.login();
+            this.modal.querySelector('.save').addEventListener('click', this.submitModal.bind(this));
+            this.modal.querySelector('.cancel').addEventListener('click', this.closeModal.bind(this));
+        }
+
+        async submitModal () {
+            const modal = this.modal,
+                session = this.session,
+                subscriptionId = modal.getAttribute('data-subscription-id'),
+                frequency = modal.querySelector('[name="frequency"] option:checked').getAttribute('data-interval-frequency');
+
+            await recharge.subscription.updateSubscription(session, subscriptionId, {
+                charge_interval_frequency: frequency,
+                order_interval_frequency: frequency,
+                order_interval_unit: 'month',
+            }).then((response) => {
+                location.reload();
+            })
+        }
+
+        closeModal() {
+            this.modal.classList.add('hidden');
+            this.modal.removeAttribute('data-subscription-id');
+            this.modal.removeAttribute('data-next-charge');
+            this.modal.querySelector('[name="frequency"]').innerHTML = ''
+            document.body.classList.remove('scroll-lock');
+            document.getElementById("customer_logout_link").focus();
+        }
+    }
+
+    customElements.define('edit-frequency', EditFrequency);
+</script>
+
+<style>
+    .recharge-edit-frequency__inner {
+        background-color: #fff;
+        width: 500px;
+        max-width: 100%;
+        max-height: 100%;
+        padding: 30px;
+        position: relative;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    .recharge-edit-frequency__input-group {
+        margin-bottom: 15px;
+    }
+
+    .recharge-edit-frequency__button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .recharge-edit-frequency__button-group .button {
+        flex: 1;
+    }
+
+    .recharge-edit-frequency__form {
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .recharge-edit-frequency__form label {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .recharge-edit-frequency__form label span {
+        display: block;
+        width: 100%;
+    }
+
+    .recharge-edit-frequency__form input {
+        margin-top: 7px;
+    }
+
+    @media all and (min-width: 500px) {
+        .recharge-edit-frequency__button-group {
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
+            height: 50px;
+        }
+
+        .recharge-edit-frequency__button-group  .button + .button {
+            margin-top: 0;
+        }
+    }
+</style>

@@ -1,0 +1,327 @@
+recharge-widget {
+    position: relative;
+    z-index: 2;
+}
+
+.widget,
+.visible {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+.widget__template-radio,
+.widget__template-button-group {
+    margin-bottom: 20px;
+}
+
+.widget__template-radio .widget__selling-plans {
+    display: none;
+    padding-bottom: 8px;
+}
+
+.widget__template-radio.radio-group .widget__radio-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.widget__template-radio.radio-group .widget__radio {
+    padding: 0;
+}
+
+.widget__template-radio.radio-group .widget__radio:first-of-type {
+    border-bottom: 1px solid #ccc;
+}
+
+.widget__template-radio.radio-group .widget__radio-option-selector {
+    padding: 8px 20px;
+}
+
+.widget__template-radio.radio-group .option-price {
+    order: 1;
+    margin-right: 5px;
+}
+
+.widget__template-radio.radio-group .option-discount {
+    order: 3;
+}
+
+.widget__template-radio.radio-group .option-text {
+    order: 2;
+}
+
+.widget__tempalte-radio.button-group .widget__radio-wrapper {
+    display: flex;
+}
+
+.widget__template-radio.radio-group .widget__selling-plans,
+.widget__template-radio.button-group .widget__selling-plans {
+    padding: 0;
+}
+
+.widget__template-radio.radio-group .widget__selling-plans label,
+.widget__template-radio.button-group .widget__selling-plans label {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.widget__template-radio.button-group .widget__radio-option-text {
+    display: block;
+    text-align: center;
+}
+
+.widget__template-radio.button-group .option-price {
+    width: 100%;
+}
+
+.widget__template-radio.button-group .widget__radio-input {
+    border: 0px;
+    clip: rect(0px, 0px, 0px, 0px);
+    height: 1px;
+    width: 1px;
+    margin: -1px;
+    padding: 0px;
+    overflow: hidden;
+    white-space: nowrap;
+    position: absolute;
+}
+
+.widget__template-radio.button-group .widget__radio-wrapper {
+    display: flex;
+    gap: 5px;
+}
+
+.widget__template-radio.button-group .widget__radio {
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    width: 50%;
+    max-width: 200px;
+}
+
+.widget__template-radio.button-group .widget__radio.widget-option--active {
+    box-shadow: 0px 0px 0px 1px #ccc;
+}
+
+.widget__template-radio.button-group .widget__radio:first-of-type {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.widget__template-radio.button-group .widget__radio:last-of-type {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.widget__template-radio.button-group .option-text,
+.widget__template-radio.button-group .option-discount {
+    font-size: 14px;
+}
+
+.widget__template-radio.button-group .option-price {
+    line-height: 1.2;
+}
+
+.widget__checkbox .widget__selling-plans {
+    padding: 0;
+}
+
+.widget__template-checkbox {
+    margin-bottom: 10px;
+}
+
+/* radio template */
+.widget__radio {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.widget__radio-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.widget__radio-input {
+    margin: 0;
+    width: 19px;
+    height: 16px;
+}
+
+.widget__radio-option-text {
+    display: flex;
+    gap: 4px;
+}
+
+.widget__radio-option-selector {
+    padding: 8px 12px;
+}
+
+.widget__selling-plans {
+    padding-left: 40px;
+    padding-right: 13px;
+    width: 100%;
+}
+
+.widget__selling-plans-dropdown__label {
+    color: var(--rc-text-color);
+    padding-right: 6px;
+}
+
+.widget__selling-plans-dropdown__select {
+    margin-bottom: 0;
+}
+
+.widget__radio,
+.widget__checkbox {
+    color: var(--rc-text-color);
+}
+
+.widget__radio.widget-option--active {
+    color: var(--rc-active-color);
+    background-color: var(--rc-background-color);
+}
+
+.widget-option--active .widget__selling-plans:not(.hidden) {
+    display: block;
+}
+
+.widget__selling-plans-dropdown__select {
+    padding: 12px 28px 12px 12px;
+    margin-bottom: 0;
+}
+
+/* subscription details */
+.widget__subscription-details:focus-within .widget__tooltip,
+.widget__subscription-details:hover .widget__tooltip,
+.widget__subscription-details:hover:after {
+    display: block;
+}
+
+.widget__subscription-details {
+    position: relative;
+    width: fit-content;
+    width: -moz-fit-content;
+}
+
+.widget__subscription-details:after {
+    display: none;
+    content: "";
+    width: 1px;
+    border: 10px solid rgba(0,0,0,0);
+    position: absolute;
+    top: 18px;
+}
+
+.widget__subscription-details-button {
+    border: 0;
+    box-shadow: none;
+    background: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--rc-text-color);
+    height: auto;
+    line-height: normal;
+    padding-bottom: 12px;
+    padding-left: 0;
+}
+
+.widget__subscription-details__text {
+    padding-left: 8px;
+}
+
+.widget__tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    cursor: default;
+    left: 0;
+    text-align: left;
+    width: 300px;
+    color: var(--rc-tooltip-text);
+    background-color: var(--rc-tooltip-background);
+}
+
+.widget__tooltip a {
+    color: var(--rc-widget-link-color);
+}
+
+.widget__tooltip .widget-tooltip__badge {
+    color: var(--rc-tooltip-background);
+    background-color: var(--rc-tooltip-text);
+}
+
+.widget__tooltip .arrow {
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 5px 6px 5px;
+    border-color: transparent;
+    border-bottom-color: var(--rc-tooltip-background);
+    top: -5px;
+    left: 0;
+}
+
+.widget__tooltip-content {
+    font-size: 12px;
+    padding: 12px;
+    z-index: 1000;
+}
+
+.widget__tooltip-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.widget-tooltip__badge {
+    font-size: 12px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    padding: 4px 12px;
+    text-decoration: none;
+}
+
+.widget-tooltip__badge span {
+    font-weight: 400;
+    padding-right: 4px;
+}
+
+.widget-tooltip__badge svg {
+    width: 5em;
+}
+
+.widget__code-snippets {
+    max-width: 100%;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.widget__code-snippets span {
+    color: #d73a49
+}
+
+.widget__code-snippets p {
+    color: rgba(var(--color-foreground), 0.75)
+}
+
+.next-shipment {
+    max-width: 44rem;
+}
+
+.next-shipment__add {
+    width: 100%;
+    margin-bottom: 10px;
+}

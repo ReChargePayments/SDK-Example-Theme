@@ -1,0 +1,418 @@
+<section class="subscriptions">
+    <h2>Subscriptions</h2>
+    <account-subscriptions>
+        <div class="subscriptions__active hidden">
+            <h3>Active</h3>
+            <table class="subscriptions__table">
+                <thead>
+                    <tr>
+                        <th class="product-cell">Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="subscriptions__inactive hidden">
+            <h3>Inactive</h3>
+            <table class="subscriptions__table">
+                <thead>
+                    <tr>
+                        <th class="product-cell">Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="subscriptions-loader">
+            <div class="subscriptions-loader__spinner"><span class="visually-hidden">Getting your subscriptions...</span></div>
+        </div>
+    </account-subscriptions>
+    {% render 'rc-edit-sub-address' %}
+    {% render 'rc-swap-product' %}
+    {% render 'rc-update-frequency' %}
+</section>
+
+<script>
+    class AccountSubscriptions extends HTMLElement {
+        selectors = {
+            loader: '.subscriptions-loader',
+            activeTable: '.subscriptions__active .subscriptions__table',
+            inactiveTable: '.subscriptions__inactive .subscriptions__table',
+        };
+
+        constructor() {
+            super();
+            this.init();
+        }
+
+        async login() {
+            this.session = await recharge.auth.loginShopifyAppProxy();
+        }
+
+        async init() {
+            this.setLoading(true);
+
+            await this.login();
+            const { subscriptions } = await recharge.subscription.listSubscriptions(this.session,);
+            subscriptions.forEach(subscription => {
+                const activeTableBody = this.querySelector(`${this.selectors.activeTable} tbody`);
+                const inactiveTableBody = this.querySelector(`${this.selectors.inactiveTable} tbody`);
+                if (!activeTableBody || !inactiveTableBody) return;
+                if (subscription.status === 'active') {
+                    document.querySelector('.subscriptions__active').classList.remove('hidden');
+                    activeTableBody.append(this.createRow(subscription));
+                } else if (subscription.status === 'cancelled') {
+                    document.querySelector('.subscriptions__inactive').classList.remove('hidden');
+                    inactiveTableBody.append(this.createRow(subscription));
+                }
+            });
+
+            this.setLoading(false);
+        }
+
+        async setLoading(value) {
+            const loader = this.querySelectorAll(this.selectors.loader);
+            if (!value && loader) {
+                loader.forEach(el => el.remove());
+            } else if (value) {
+                const loadingEl = document.createElement('div');
+                loadingEl.classList.add(this.selectors.loader.split('.')[1]);
+                this.append(loadingEl);
+            }
+        }
+
+        openDateModal(subscription) {
+            const modal = document.querySelector('.recharge-datepicker.datepicker');
+            modal.classList.remove('hidden');
+            modal.setAttribute('data-subscription-id', subscription.id);
+            modal.querySelector('.datepicker__text strong').innerHTML = window.moment(subscription.next_charge_scheduled_at).format('MMMM Do, YYYY');
+            modal.querySelector('.datepicker__input').value = subscription.next_charge_scheduled_at;
+            document.getElementById('date_picker').focus();
+            document.body.classList.add('scroll-lock');
+        }
+
+        openSwapModal(subscription) {
+            const modal = document.querySelector('.recharge-swap-product');
+            modal.setAttribute('data-subscription-id', subscription.id);
+            modal.querySelector('.recharge-swap-product__item-input[data-product-id="' + subscription.external_product_id.ecommerce + '"]').parentElement.classList.add('hidden')
+            modal.classList.remove('hidden');
+            modal.querySelector('.cancel').focus();
+            document.body.classList.add('scroll-lock');
+        }
+
+        async openFrequencyModal(subscription) {
+            const modal = document.querySelector('.recharge-edit-frequency');
+            modal.setAttribute('data-subscription-id', subscription.id);
+            modal.setAttribute('data-product-id', subscription.external_product_id.ecommerce);
+            modal.setAttribute('data-variant-id', subscription.external_variant_id.ecommerce);
+            modal.classList.remove('hidden');
+            modal.querySelector('.cancel').focus();
+            document.body.classList.add('scroll-lock');
+
+            await recharge.cdn.getCDNProduct(subscription.external_product_id.ecommerce)
+            .then((response) => {
+                const plans = response.selling_plan_groups[0].selling_plans;
+                plans.forEach(plan => {
+                    const option = document.createElement('option');
+                    option.setAttribute('value', plan.id);
+                    option.setAttribute('data-interval-frequency', plan.order_interval_frequency);
+                    option.innerText = plan.selling_plan_name;
+                    modal.querySelector('select').append(option);
+                });
+            })
+
+            modal.querySelector('.save').removeAttribute('disabled');
+        }
+
+        createRow(subscription) {
+            const row = document.createElement('tr');
+            row.setAttribute('data-subscription-id', subscription.id);
+            row.setAttribute('data-address-id', subscription.address_id);
+
+
+            const productCol = document.createElement('td');
+            productCol.classList.add('product-cell');
+            productCol.innerHTML = '<span class="mobile-label">Product: </span>'
+
+            const productInfo = document.createElement('div');
+            productInfo.classList.add('product-info');
+            productInfo.innerHTML = `<span class="product-title">${subscription.product_title}</span>`;
+
+            if (subscription.status === 'active') {
+                productInfo.innerHTML += `
+                    <div class="frequency">
+                        <span>Frequency:</span>
+                        <span>Every ${subscription.order_interval_frequency} ${subscription.order_interval_unit}(s) (<button class="edit-button">change</button>)</span>
+                    </div>
+                    <div class="next-charge">
+                        <span>Next charge date:</span>
+                        <span>${window.moment(subscription.next_charge_scheduled_at).format('MMMM Do, YYYY')} (<button class="edit-button">change</button>)</span>
+                    </div>
+                `;
+
+                if (subscription.is_swappable) {
+                    productInfo.querySelector('.product-title').innerHTML += ` (<button class="edit-button">change</button>)`;
+                    productInfo.querySelector('.product-title .edit-button').addEventListener('click', this.openSwapModal.bind(this, subscription))
+                }
+
+                productInfo.querySelector('.frequency .edit-button').addEventListener('click', this.openFrequencyModal.bind(this, subscription))
+                productInfo.querySelector('.next-charge .edit-button').addEventListener('click', this.openDateModal.bind(this, subscription));
+            }
+
+            productCol.append(productInfo);
+
+            row.append(productCol);
+
+            const quantityCol = document.createElement('td');
+            quantityCol.classList.add('subscription-quantity');
+            quantityCol.innerHTML = '<span class="mobile-label">Quantity: </span>' + '<span>' + subscription.quantity + '</span>';
+            row.append(quantityCol);
+
+            const priceCol = document.createElement('td');
+            priceCol.classList.add('subscription-price');
+            priceCol.innerHTML = '<span class="mobile-label">Price: </span>' + '<span>' + `$` + subscription.price + '</span>';
+            row.append(priceCol);
+
+            const toggleCol = document.createElement('td');
+            let toggleText = 'Cancel';
+            toggleCol.classList.add('subscription-edit');
+            toggleCol.innerHTML = '<button class="toggle-button"></button>';
+            switch (subscription.status) {
+                case 'active':
+                    toggleCol.querySelector('.toggle-button').addEventListener('click', () => {
+                        this.cancelSubscription(subscription.id);
+                    });
+
+                    this.renderAddress(subscription.address_id, row);
+                    break;
+                case 'cancelled':
+                    toggleText = 'Reactivate'
+                    toggleCol.querySelector('.toggle-button').addEventListener('click', () => {
+                        this.activateSubscription(subscription.id);
+                    });
+                    break;
+                default:
+                    break;
+            }
+
+            toggleCol.querySelector('.toggle-button').innerHTML = toggleText;
+            row.append(toggleCol);
+
+            return row;
+        }
+
+        async pauseSubcription(subscriptionId) {
+            await recharge.subscription.pauseSubscription(this.session, subscriptionId);
+            location.reload();
+        }
+
+        async cancelSubscription(subscriptionId) {
+            await recharge.subscription.cancelSubscription(this.session, subscriptionId, {
+                send_email: false,
+            });
+            location.reload();
+        }
+
+        async activateSubscription(subscriptionId) {
+            await recharge.subscription.activateSubscription(this.session, subscriptionId);
+            location.reload();
+        }
+
+        async renderAddress(address_id, row) {
+            let address = await recharge.address.getAddress(this.session, address_id),
+                addressSpan = document.createElement('div'),
+                addressName = address.first_name + ' ' + address.last_name,
+                addressStreet = address.address1;
+
+            if (address.address2 != null) {
+                addressStreet += ' ' + address.address2;
+            }
+
+            addressSpan.classList.add('sub-address');
+            addressSpan.innerHTML += `<span class="sub-address__label">Address:</span>`
+            addressSpan.innerHTML += `<span class="sub-address__name">${address.first_name} ${address.last_name}</span>`
+            addressSpan.innerHTML += `<span class="sub-address__address-1">${addressStreet}</span>`
+            addressSpan.innerHTML += `<span class="sub-address__city-province">${address.city} ${address.zip} (<button class="edit-button">change</button>)</span>`
+
+            addressSpan.querySelector('.edit-button').addEventListener('click', () => {
+                let addressModal = document.querySelector('.recharge-edit-address');
+                addressModal.setAttribute('data-subscription-id', row.getAttribute('data-subscription-id'));
+                addressModal.setAttribute('data-address-id', row.getAttribute('data-address-id'));
+                addressModal.querySelector('input[value="' + row.dataset.addressId + '"]').parentElement.classList.add('hidden');
+                addressModal.classList.remove('hidden');
+                document.body.classList.add('scroll-lock');
+            })
+
+            row.querySelector('.product-cell > div').append(addressSpan);
+        }
+    }
+    customElements.define('account-subscriptions', AccountSubscriptions);
+</script>
+
+<style>
+
+    .subscriptions {
+        width: 100%;
+    }
+
+    .subscriptions h3 {
+        margin: 0 0 1rem;
+    }
+
+    .subscriptions account-subscriptions > div + div {
+        margin-top: 30px;
+    }
+
+    .subscriptions-loader {
+        display: flex;
+        justify-content: center;
+        padding-top: 16px;
+    }
+
+    .subscriptions-loader__spinner {
+        display: inline-block;
+        border-top: 2px solid currentcolor;
+        border-right: 2px solid currentcolor;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-radius: 99999px;
+        border-bottom-width: 2px;
+        border-left-width: 2px;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        animation: 0.45s linear 0s infinite normal none running spinner;
+        width: var(--spinner-size);
+        height: var(--spinner-size);
+        --spinner-size: 5rem;
+    }
+
+    .subscriptions__table .product-cell div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .subscriptions__table .product-cell .product-title {
+        margin-bottom: 6px;
+    }
+
+    .subscriptions__inactive .next-charge,
+    .subscriptions__inactive .sub-address {
+        display: none;
+    }
+
+    .subscriptions__table td.id {
+        vertical-align: middle !important;
+    }
+
+    .subscriptions__table {
+        font-size: 1.6rem;
+        table-layout: auto;
+        border-collapse: collapse;
+        box-shadow: none;
+        width: 100%;
+        border: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .subscriptions__table thead {
+        border-bottom: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .subscriptions__table thead th {
+        text-align: left;
+        font-size: 1.2rem;
+        letter-spacing: .07rem;
+        text-transform: uppercase;
+    }
+
+    .subscriptions__table th,
+    .subscriptions__table td {
+        text-align: left;
+        padding: 10px 14px;
+        width: 15%;
+    }
+
+    .subscriptions__table td {
+        vertical-align: top;
+    }
+
+    .subscriptions__table tbody tr+tr {
+        border-top: 1px solid rgba(var(--color-foreground), .08);
+    }
+
+    .subscriptions__table tbody td span {
+        font-size: 1.4rem;
+        text-align: left;
+        letter-spacing: .07rem;
+        flex-grow: 1;
+    }
+
+    .subscriptions__table tbody td .mobile-label {
+        text-transform: uppercase;
+        flex-grow: unset;
+        width: 82px;
+    }
+
+    .subscriptions-table td.id {
+        vertical-align: middle !important;
+    }
+
+    .subscriptions__table th:first-of-type,
+    .subscriptions__table td:first-of-type {
+        padding-left: 2.2rem;
+    }
+
+    .subscriptions__table th:last-of-type,
+    .subscriptions__table td:last-of-type {
+        padding-right: 2.2rem;
+    }
+
+    @media all and (max-width: 750px) {
+
+        .subscriptions__table tr {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .subscriptions__table thead {
+            display: none;
+        }
+
+        .subscriptions__table tbody td {
+            display: flex;
+            width: 100%;
+            padding: 1.2rem 1.6rem;
+            gap: 1.6rem;
+        }
+
+        .subscriptions__table tbody td:first-of-type {
+            padding-left: 1.6rem;
+        }
+
+        .subscription-edit button {
+            margin: 0 auto;
+        }
+    }
+
+    @media all and (min-width: 751px) {
+
+        .subscriptions__table tbody td .mobile-label {
+            display: none;
+        }
+
+        .subscriptions__table .product-cell {
+            width: auto;
+        }
+
+        .subscriptions__table th,
+        .subscriptions__table td {
+            padding-top: 1.4rem;
+            padding-bottom: 1.4rem;
+        }
+    }
+</style>
