@@ -4,7 +4,7 @@ This example theme is provided as a starting point for storefront development. P
 
 This example theme is based off of the Shopify Refresh (version 8.0.0) theme. This theme is very similar to Dawn (version 8.0.0) but with styling changes. The layout of the files and folders in this repo should match the Shopify themes making it easy to compare to standard Shopify themes.
 
-Most of the examples will required a customer to be authenticated and should be shown on the customer's account page.
+Most of the examples will require a customer to be authenticated and should be shown on the customer's account page.
 
 ## Init SDK
 
@@ -46,12 +46,8 @@ The [rc-addresses.liquid](./snippets/rc-addresses.liquid) snippet shows how you 
 - [Add a new address](./snippets/rc-addresses.liquid#L161)
 - [Delete an address](./snippets/rc-addresses.liquid#L178)
 
-## Custom widget to add products to their next subscription
+## Add to next order
 
-Render a widget that will give authenticated customers the ability to add products to their next subscription.
+Render a widget that will give authenticated customers the ability to add products to their next subscription delivery.
 
 In this example we render the [rc-widget.liquid](./snippets/rc-widget.liquid) snippet inside of [main-product.liquid](./sections/main-product.liquid#L85). For more details of what the widget is doing see [rc-widget.js](./assets/rc-widget.js).
-
-## Bundles
-
-TODO
